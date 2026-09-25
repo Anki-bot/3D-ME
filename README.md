@@ -2,7 +2,7 @@
 
 *A cinematic, WebGL-enhanced creative developer portfolio built with Next.js 16, React Three Fiber, custom GLSL shaders, and GSAP.*
 
-**🌍 Live Experience:** [Insert your Vercel URL here]
+**🌍 Live Experience:** https://3d-me-nu.vercel.app/
 
 ## 📖 Overview
 An interactive single-page portfolio engineered for high-craft storytelling, spatial depth, and strict accessibility compliance. The architecture pairs server-rendered semantic content with lazy-loaded 3D WebGL scenes, scroll-driven GLSL shader transitions, and a deterministic capability gate that adapts automatically to device performance and reduced-motion preferences.
