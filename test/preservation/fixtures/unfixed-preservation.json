@@ -1,0 +1,213 @@
+{
+  "property": "Property 2: Preservation - Non-Buggy Portfolio Behavior Remains Equivalent",
+  "observedState": "unfixed implementation before production bugfixes",
+  "validNavigation": [
+    { "label": "Home", "id": "home", "href": "#home" },
+    { "label": "About", "id": "about", "href": "#about" },
+    { "label": "Work", "id": "projects", "href": "#projects" }
+  ],
+  "smoothNavigation": {
+    "cssScrollBehavior": "smooth",
+    "lenis": { "autoRaf": false, "duration": 1.2, "smoothWheel": true }
+  },
+  "sectionOrder": ["home", "about", "projects"],
+  "sectionCopy": [
+    {
+      "section": "home",
+      "sources": [
+        {
+          "file": "src/components/Hero/HeroContent.tsx",
+          "values": [
+            "Creative Developer • Designer • Interactive Experiences",
+            "Building Digital Experiences",
+            "I create immersive digital experiences through modern web technologies, motion design, and interactive storytelling.",
+            "Explore Work"
+          ]
+        },
+        {
+          "file": "src/components/Hero/ScrollIndicator.tsx",
+          "values": ["Scroll"]
+        }
+      ]
+    },
+    {
+      "section": "about",
+      "sources": [
+        {
+          "file": "src/components/About/AboutContent.tsx",
+          "values": [
+            "01",
+            "About",
+            "I build immersive digital experiences that blend creativity, interaction, and technology.",
+            "Every project is designed with performance, storytelling, motion, and usability in mind. The goal is not only to create beautiful interfaces, but experiences that people remember.",
+            "Creative Development",
+            "Motion Design",
+            "Interactive UI",
+            "Web Experiences"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "projects",
+      "sources": [
+        {
+          "file": "src/components/Projects/Projects.tsx",
+          "values": [
+            "Featured Projects",
+            "Selected work crafted with performance, motion, and storytelling."
+          ]
+        }
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": 1,
+      "title": "Immersive Commerce",
+      "category": "Web Experience",
+      "year": "2026",
+      "description": "An interactive commerce experience combining cinematic motion, immersive storytelling, and a refined digital interface.",
+      "image": "/images/project-1.jpg"
+    },
+    {
+      "id": 2,
+      "title": "Creative Portfolio",
+      "category": "Digital Experience",
+      "year": "2026",
+      "description": "A cinematic portfolio experience built around expressive typography, fluid transitions, and interactive visual storytelling.",
+      "image": "/images/project-2.jpg"
+    },
+    {
+      "id": 3,
+      "title": "Motion Studio",
+      "category": "Brand Experience",
+      "year": "2026",
+      "description": "A contemporary brand experience focused on art direction, motion design, elegant typography, and high-performance interactions.",
+      "image": "/images/project-3.jpg"
+    }
+  ],
+  "projectActions": {
+    "currentRecordsHaveDefinedActions": false,
+    "preservedSemanticFields": ["id", "title", "category", "year", "description", "image"],
+    "knownDefectExcluded": "The unfixed View Project control is inert and remains owned by the task 1 bug-condition suite; preservation compares project semantics independently of that control."
+  },
+  "visuals": {
+    "eligibleViewport": { "width": 1440, "height": 1000, "motionAllowed": true, "finePointer": true },
+    "wideNavbarTokens": [
+      "gap-12",
+      "rounded-full",
+      "border-white/10",
+      "bg-white/5",
+      "px-8",
+      "py-4",
+      "backdrop-blur-2xl"
+    ],
+    "hero": {
+      "glowOrbs": [
+        { "x": 35, "y": 25, "duration": 12 },
+        { "x": -30, "y": -20, "duration": 14 },
+        { "x": 0, "y": 20, "duration": 16 }
+      ],
+      "glassOrb": {
+        "floating": { "y": -18, "duration": 4, "repeat": -1, "yoyo": true, "ease": "sine.inOut" },
+        "rotation": { "rotate": 360, "duration": 30, "repeat": -1, "ease": "none" },
+        "breathing": { "scale": 1.03, "duration": 3, "repeat": -1, "yoyo": true, "ease": "sine.inOut" },
+        "tokens": ["h-[280px]", "w-[280px]", "border-white/20", "bg-white/[0.06]", "backdrop-blur-3xl"]
+      },
+      "noise": { "dotSizePx": 0.8, "backgroundSize": "20px 20px", "opacityToken": "opacity-[0.025]" },
+      "particleCount": 6
+    },
+    "stickyProjectSequence": {
+      "heightPerProjectVh": 100,
+      "tokens": ["sticky", "top-0", "h-screen", "overflow-hidden"],
+      "scrollStart": "top top",
+      "scrollEnd": "bottom bottom",
+      "oneActiveProject": true
+    },
+    "projectTransition": {
+      "directionExpression": "activeProject % 2 === 0 ? 1 : -1",
+      "imageOffset": 35,
+      "containerDuration": 0.7,
+      "imageDuration": 0.9,
+      "contentDuration": 0.55,
+      "contentStagger": 0.06
+    },
+    "hover": {
+      "heroCtaTokens": ["hover:scale-105", "hover:border-white/40", "group-hover:translate-x-1"],
+      "projectImageTokens": ["hover:border-white/20", "group-hover:scale-[1.04]", "group-hover:opacity-100"]
+    },
+    "pointer": {
+      "cursorMoveDuration": 0.2,
+      "cursorInteractiveScale": 1.8,
+      "cursorScaleDuration": 0.3,
+      "interactiveSelector": "button, a, [role='button']",
+      "heroParallaxRange": 30,
+      "heroParallaxDuration": 1.2,
+      "projectContainerRange": 10,
+      "projectImageRange": -14
+    }
+  },
+  "cleanup": {
+    "eventListenerOwners": [
+      "src/components/Cursor/Cursor.tsx",
+      "src/hooks/animations/useMouseParallax.ts",
+      "src/hooks/animations/useProjectImageAnimation.ts"
+    ],
+    "observerOwners": ["src/hooks/navigation/useActiveSection.ts"],
+    "lenisOwners": ["src/components/Layout/SmoothScroll.tsx"],
+    "tickerOwners": ["src/components/Layout/SmoothScroll.tsx"],
+    "scrollTriggerOwners": ["src/hooks/scroll/useProjectsScroll.ts"],
+    "explicitTweenCleanupOwners": [
+      "src/components/Cursor/Cursor.tsx",
+      "src/components/Hero/Background/GlowOrb.tsx",
+      "src/components/Hero/Background/GlassOrb.tsx",
+      "src/hooks/animations/useProjectImageAnimation.ts",
+      "src/hooks/animations/useProjectTransition.ts"
+    ],
+    "gsapContextManagedOwners": [
+      "src/components/Hero/Background/GlowOrb.tsx",
+      "src/components/Hero/Background/GlassOrb.tsx",
+      "src/hooks/animations/useHeroTimeline.ts",
+      "src/hooks/animations/useMouseParallax.ts",
+      "src/hooks/animations/useProjectImageAnimation.ts",
+      "src/hooks/animations/useProjectTransition.ts",
+      "src/hooks/animations/useSectionReveal.ts",
+      "src/hooks/scroll/useProjectsScroll.ts"
+    ],
+    "observedMediaQueryChangeListenerPairs": 0,
+    "lifecycleResources": [
+      "event listeners",
+      "active-section observer",
+      "Lenis scroll subscription",
+      "Lenis instance",
+      "GSAP ticker callback",
+      "project ScrollTrigger",
+      "GlowOrb tween",
+      "GlassOrb tweens",
+      "project image timeline/tweens",
+      "project transition timeline",
+      "GSAP contexts",
+      "media-query change listeners"
+    ]
+  },
+  "scopeGuards": {
+    "allowedSectionIds": ["home", "about", "projects"],
+    "production3DImports": [],
+    "allowedRuntimeDependencies": [
+      "@gsap/react",
+      "@react-three/drei",
+      "@react-three/fiber",
+      "framer-motion",
+      "gsap",
+      "lenis",
+      "leva",
+      "lucide-react",
+      "next",
+      "react",
+      "react-dom",
+      "react-icons",
+      "three"
+    ]
+  }
+}

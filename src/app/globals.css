@@ -1,8 +1,89 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #000000;
+  --foreground: #ffffff;
+}
+
+html[data-theme="light"] {
+  --background: #fafaf9;
+  --foreground: #18181b;
+}
+
+/* Light theme overrides - make whole page actually light */
+html[data-theme="light"] body,
+html[data-theme="light"] main {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+html[data-theme="light"] .bg-black {
+  background-color: var(--background) !important;
+}
+
+html[data-theme="light"] .text-white {
+  color: #18181b !important;
+}
+
+html[data-theme="light"] .text-zinc-100 {
+  color: #18181b !important;
+}
+
+html[data-theme="light"] .text-zinc-200 {
+  color: #27272a !important;
+}
+
+html[data-theme="light"] .text-zinc-300,
+html[data-theme="light"] .text-gray-300 {
+  color: #3f3f46 !important;
+}
+
+html[data-theme="light"] .text-zinc-400,
+html[data-theme="light"] .text-gray-400 {
+  color: #52525b !important;
+}
+
+html[data-theme="light"] .text-zinc-500,
+html[data-theme="light"] .text-gray-500 {
+  color: #71717a !important;
+}
+
+html[data-theme="light"] .text-zinc-600 {
+  color: #52525b !important;
+}
+
+html[data-theme="light"] .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-theme="light"] .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+html[data-theme="light"] .bg-white\/5 {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+html[data-theme="light"] .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+html[data-theme="light"] .bg-zinc-900 {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-theme="light"] .from-black\/55 {
+  --tw-gradient-from: rgba(250, 250, 249, 0.4) !important;
+}
+
+html[data-theme="light"] .border-white:not(.cursor-dot) {
+  border-color: #0a0a0a !important;
+}
+
+html[data-theme="light"] .bg-white:not(.cursor-dot) {
+  background-color: #18181b !important;
+  color: #fafaf9 !important;
 }
 
 @theme inline {
@@ -12,32 +93,60 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-body {
-  cursor: none;
-}
-
 html {
-  scroll-behavior: auto;
+  scroll-behavior: smooth;
 }
 
 html,
 body {
+  min-height: 100%;
   overflow-x: hidden;
+  background: var(--background);
 }
 
-html {
-  scroll-behavior: smooth;
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Cursor - inverts for both themes via mix-blend-difference */
+.cursor-dot {
+  border-color: #ffffff !important;
+  background-color: transparent !important;
+  mix-blend-mode: difference !important;
+}
+
+html[data-theme="light"] .cursor-dot {
+  border-color: #ffffff !important;
+  background-color: transparent !important;
+}
+
+/* Progressive custom cursor: only hide native cursor when JS confirms fine pointer */
+html.custom-cursor-active body,
+html.custom-cursor-active button,
+html.custom-cursor-active a,
+html[data-custom-cursor="active"] body,
+html[data-custom-cursor="active"] button,
+html[data-custom-cursor="active"] a {
+  cursor: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

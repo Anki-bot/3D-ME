@@ -4,34 +4,48 @@ import { RefObject } from "react";
 import { ScrollTrigger, useGSAP } from "@/lib/gsap";
 
 interface UseProjectsScrollProps {
-  container: RefObject<HTMLElement | null>;
+  container: RefObject<HTMLDivElement | null>;
+  enabled: boolean;
   projectCount: number;
   onProjectChange: (index: number) => void;
 }
 
 export function useProjectsScroll({
   container,
+  enabled,
   projectCount,
   onProjectChange,
 }: UseProjectsScrollProps) {
   useGSAP(() => {
-    if (!container.current) return;
+    if (!enabled || !container.current || projectCount <= 0) return;
 
-    ScrollTrigger.create({
+    let currentIndex = 0;
+
+    const trigger = ScrollTrigger.create({
       trigger: container.current,
       start: "top top",
       end: "bottom bottom",
 
       onUpdate: (self) => {
-        const progress = self.progress;
-
-        const index = Math.min(
-          Math.floor(progress * projectCount),
-          projectCount - 1
+        const index = Math.max(
+          0,
+          Math.min(
+            Math.floor(self.progress * projectCount + 0.25),
+            projectCount - 1,
+          ),
         );
 
-        onProjectChange(index);
+        if (index !== currentIndex) {
+          currentIndex = index;
+          onProjectChange(index);
+        }
       },
     });
-  });
+
+    onProjectChange(0);
+
+    return () => {
+      trigger.kill();
+    };
+  }, [enabled, projectCount]);
 }

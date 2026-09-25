@@ -21,14 +21,13 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   return (
     <article
       ref={containerRef}
-      className="grid min-h-screen items-center gap-16 px-6 py-20 lg:grid-cols-2 lg:px-12"
+      data-project-id={project.id}
+      className="flex w-full flex-col justify-center"
     >
-      {/* Left Side */}
-        <ProjectContent project={project} />
-
-      {/* Right Side */}
-      <div className="flex items-center justify-center">
+      <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:gap-16">
         <ProjectImage project={project} />
+
+        <ProjectContent project={project} />
       </div>
     </article>
   );

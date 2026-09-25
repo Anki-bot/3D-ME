@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navigation/Navbar";
 import Hero from "@/components/Hero/Hero";
 import About from "@/components/About/About";
-import Projects from "@/components/Projects/Projects";
+import SolarSystem from "@/components/SolarSystem/SolarSystem";
 import Cursor from "@/components/Cursor/Cursor";
 
 export default function Home() {
@@ -11,7 +11,7 @@ export default function Home() {
       <Navbar />
       <Hero />
       <About />
-      <Projects />
+      <SolarSystem />
     </main>
   );
 }

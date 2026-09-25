@@ -21,6 +21,23 @@ export function useHeroTimeline(refs: HeroTimelineRefs) {
       return;
     }
 
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (prefersReducedMotion) {
+      gsap.set(
+        [
+          refs.eyebrow.current,
+          refs.title.current,
+          refs.description.current,
+          refs.button.current,
+        ],
+        { opacity: 1, y: 0, clearProps: "transform" }
+      );
+      return;
+    }
+
     // Set the initial state before the animation starts.
     gsap.set(
       [
@@ -50,25 +67,25 @@ export function useHeroTimeline(refs: HeroTimelineRefs) {
       y: 0,
       duration: 0.7,
     })
-    .to(
-      refs.title.current,
-      {
-      opacity: 1,
-      y: 0,
-      duration: 0.3,
-      },
-      "-=0.35"
-    )
-    .from(
-    words,
-    {
-    opacity: 0,
-    y: 40,
-    stagger: 0.12,
-    duration: 0.9,
-    },
-    "<"
-    )
+      .to(
+        refs.title.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.3,
+        },
+        "-=0.35"
+      )
+      .from(
+        words,
+        {
+          opacity: 0,
+          y: 40,
+          stagger: 0.12,
+          duration: 0.9,
+        },
+        "<"
+      )
       .to(
         refs.description.current,
         {
@@ -87,5 +104,28 @@ export function useHeroTimeline(refs: HeroTimelineRefs) {
         },
         "-=0.45"
       );
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        tl.kill();
+        gsap.set(
+          [
+            refs.eyebrow.current,
+            refs.title.current,
+            refs.description.current,
+            refs.button.current,
+          ],
+          { opacity: 1, y: 0, clearProps: "transform" }
+        );
+      }
+    };
+
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    query.addEventListener("change", handleChange);
+
+    return () => {
+      query.removeEventListener("change", handleChange);
+      tl.kill();
+    };
   });
 }

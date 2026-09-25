@@ -1,0 +1,66 @@
+{
+  "auditedBundle": {
+    "source": ".next/diagnostics/route-bundle-stats.json",
+    "firstLoadUncompressedJsBytes": 685160,
+    "currentEvidenceNote": "The audited file recorded 685160 bytes. It was absent at task start, so the fixed numeric baseline is retained rather than silently substituted."
+  },
+  "coverageBeforeTask": {
+    "testScript": null,
+    "projectOwnedTestFiles": []
+  },
+  "testInfrastructure": {
+    "nodeTestRunner": "built-in node:test on the exact runtime captured in build-evidence.json",
+    "propertyGenerator": "project-owned seeded xorshift generator (seeded, deterministic, no third-party dependency)",
+    "browserDriver": "project-owned Chrome DevTools Protocol harness using the locally installed browser",
+    "addedTestDependencies": []
+  },
+  "focusedViewports": [
+    { "name": "phone-320", "width": 320, "height": 568 },
+    { "name": "tablet", "width": 768, "height": 1024 },
+    { "name": "short-landscape", "width": 844, "height": 390 },
+    { "name": "wide-tall-desktop", "width": 1440, "height": 1000 }
+  ],
+  "counterexamples": {
+    "sectionGeometry": { "sectionHeight": 3000, "viewportHeight": 1000, "threshold": 0.6, "maximumIntersectionRatio": 0.3333333333333333 },
+    "missingDestination": "#contact",
+    "inertExploreLabel": "Explore Work",
+    "inertProjectActionLabel": "View Project",
+    "cursorBeforeReadiness": { "nativeCursor": "none", "customCursorReady": false },
+    "ineligibleEffectWork": {
+      "sequence": ["mount", "eligible", "ineligible"],
+      "survivingResources": [
+        "Lenis instance",
+        "GSAP ticker callback",
+        "Lenis scroll listener / ScrollTrigger update",
+        "GlassOrb's three infinite tweens while its lg-only ancestor is hidden",
+        "GlowOrb infinite tweens after the hero is offscreen",
+        "Hero mousemove parallax listener after the hero is offscreen"
+      ]
+    },
+    "responsiveClipping": {
+      "phone-320x568": {
+        "navbar": { "left": -116.53125, "right": 436.546875, "width": 553.078125, "contained": false },
+        "stickyHeight": 568,
+        "articleHeight": 738.375,
+        "projectContentReachable": false
+      },
+      "short-landscape-844x390": {
+        "stickyHeight": 390,
+        "articleHeight": 947.5,
+        "projectContentReachable": false
+      }
+    },
+    "progressOutsideProjects": { "position": "fixed", "projectsCurrent": false, "visibleAtDesktop": true },
+    "exploreActivation": { "element": "BUTTON", "href": null, "fragmentAfterClick": "", "projectsTop": 2000, "viewportHeight": 1000 },
+    "reducedMotion": { "scrollBehavior": "smooth", "bouncingAnimations": ["bounce"] },
+    "browser": "Google Chrome 151.0.7922.174",
+    "activeSemantics": { "activeLinkAriaCurrent": null },
+    "commands": {
+      "unit": "npm run test:bug:unit",
+      "property": "npm run test:bug:property",
+      "browser": "npm run test:bug:browser",
+      "buildEvidence": "npm run test:bug:build-evidence",
+      "all": "npm run test:bug"
+    }
+  }
+}

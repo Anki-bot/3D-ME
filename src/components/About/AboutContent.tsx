@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { useSectionReveal } from "@/hooks/animations/useSectionReveal";
 
 export default function AboutContent() {
-  const containerRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const eyebrowRef = useRef<HTMLParagraphElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -16,33 +16,54 @@ export default function AboutContent() {
   });
 
   return (
-    <section
+    <div
       ref={containerRef}
-      className="mx-auto flex min-h-screen w-full max-w-7xl flex-col justify-center px-6 py-24 lg:px-12"
+      className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col justify-center px-6 py-24 sm:px-8 lg:px-16"
     >
+
+      {/* Section Index */}
+      <div className="mb-10 flex items-center gap-4 text-[10px] uppercase tracking-[0.35em] text-zinc-600">
+        <span>01</span>
+        <span className="h-px w-10 bg-white/10" />
+        <span>About</span>
+      </div>
+
+      {/* Eyebrow */}
       <p
         ref={eyebrowRef}
-        className="mb-4 text-sm uppercase tracking-[0.4em] text-gray-500"
+        className="mb-5 text-xs uppercase tracking-[0.45em] text-zinc-500 sm:text-sm"
       >
         About
       </p>
 
+      {/* Main Statement */}
       <h2
         ref={titleRef}
-        className="max-w-4xl text-4xl font-bold leading-tight text-white sm:text-6xl lg:text-7xl"
+        className="max-w-5xl text-4xl font-semibold leading-[0.95] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl xl:text-[5.5rem]"
       >
         I build immersive digital experiences that blend creativity,
         interaction, and technology.
       </h2>
 
-      <p
-        ref={descriptionRef}
-        className="mt-10 max-w-2xl text-lg leading-8 text-gray-400"
-      >
-        Every project is designed with performance, storytelling, motion,
-        and usability in mind. The goal is not only to create beautiful
-        interfaces, but experiences that people remember.
-      </p>
-    </section>
+      {/* Lower Information */}
+      <div className="mt-12 grid gap-10 border-t border-white/10 pt-8 lg:grid-cols-[1fr_auto] lg:items-start">
+        <p
+          ref={descriptionRef}
+          className="max-w-2xl text-base leading-8 text-zinc-400 sm:text-lg sm:leading-9"
+        >
+          Every project is designed with performance, storytelling, motion,
+          and usability in mind. The goal is not only to create beautiful
+          interfaces, but experiences that people remember.
+        </p>
+
+        {/* Capabilities */}
+        <div className="flex flex-wrap gap-x-8 gap-y-3 text-[10px] uppercase tracking-[0.3em] text-zinc-600 lg:max-w-xs lg:justify-end">
+          <span>Creative Development</span>
+          <span>Motion Design</span>
+          <span>Interactive UI</span>
+          <span>Web Experiences</span>
+        </div>
+      </div>
+    </div>
   );
 }

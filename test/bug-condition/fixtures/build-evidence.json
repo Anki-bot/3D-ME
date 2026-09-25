@@ -1,0 +1,204 @@
+{
+  "capturedAt": "2026-08-27T12:20:21.838Z",
+  "environment": {
+    "node": "v24.18.0",
+    "npm": "11.16.0",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "next": "16.2.12"
+  },
+  "configured": {
+    "command": "npm run build",
+    "builder": "framework default via package script: next build",
+    "startedAt": "2026-08-27T12:20:07.552Z",
+    "finishedAt": "2026-08-27T12:20:12.531Z",
+    "exitStatus": 0,
+    "signal": null,
+    "timedOut": false,
+    "lastAnnouncedStage": "Finalizing page optimization ...",
+    "lastCompletedBuildStage": "static-generation",
+    "hasReleaseOutput": true,
+    "hasActionableExternalPrerequisiteDiagnostic": false,
+    "actionableDiagnostic": [],
+    "artifactsBefore": {
+      "BUILD_ID": {
+        "exists": true,
+        "size": 21,
+        "modifiedAt": "2026-08-27T11:31:18.936Z"
+      },
+      "prerender-manifest.json": {
+        "exists": true,
+        "size": 3062,
+        "modifiedAt": "2026-08-27T11:31:19.935Z"
+      },
+      "routes-manifest.json": {
+        "exists": true,
+        "size": 1723,
+        "modifiedAt": "2026-08-27T11:31:19.920Z"
+      },
+      "build-manifest.json": {
+        "exists": true,
+        "size": 510,
+        "modifiedAt": "2026-08-27T11:31:17.040Z"
+      },
+      "diagnostics/build-diagnostics.json": {
+        "exists": true,
+        "size": 93,
+        "modifiedAt": "2026-08-27T11:31:19.160Z"
+      },
+      "diagnostics/route-bundle-stats.json": {
+        "exists": false
+      },
+      "server/app/page.js": {
+        "exists": true,
+        "size": 66434,
+        "modifiedAt": "2026-08-27T11:31:15.777Z"
+      }
+    },
+    "artifactsAfter": {
+      "BUILD_ID": {
+        "exists": true,
+        "size": 21,
+        "modifiedAt": "2026-08-27T12:20:12.286Z"
+      },
+      "prerender-manifest.json": {
+        "exists": true,
+        "size": 3062,
+        "modifiedAt": "2026-08-27T12:20:12.493Z"
+      },
+      "routes-manifest.json": {
+        "exists": true,
+        "size": 1723,
+        "modifiedAt": "2026-08-27T12:20:12.488Z"
+      },
+      "build-manifest.json": {
+        "exists": true,
+        "size": 503,
+        "modifiedAt": "2026-08-27T12:20:10.182Z"
+      },
+      "diagnostics/build-diagnostics.json": {
+        "exists": true,
+        "size": 93,
+        "modifiedAt": "2026-08-27T12:20:12.287Z"
+      },
+      "diagnostics/route-bundle-stats.json": {
+        "exists": true,
+        "size": 932,
+        "modifiedAt": "2026-08-27T12:20:12.497Z"
+      },
+      "server/app/page.js": {
+        "exists": true,
+        "size": 927,
+        "modifiedAt": "2026-08-27T12:20:10.164Z"
+      }
+    },
+    "artifactsGeneratedOrChanged": [
+      "BUILD_ID",
+      "prerender-manifest.json",
+      "routes-manifest.json",
+      "build-manifest.json",
+      "diagnostics/build-diagnostics.json",
+      "diagnostics/route-bundle-stats.json",
+      "server/app/page.js"
+    ],
+    "output": "> immersive-portfolio@0.1.0 build\n> next build\n\n▲ Next.js 16.2.12 (Turbopack)\n\n  Creating an optimized production build ...\n✓ Compiled successfully in 1865ms\n  Running TypeScript ...\n  Finished TypeScript in 1809ms ...\n  Collecting page data using 5 workers ...\n  Generating static pages using 5 workers (0/4) ...\n  Generating static pages using 5 workers (1/4) \r\n  Generating static pages using 5 workers (2/4) \r\n  Generating static pages using 5 workers (3/4) \r\n✓ Generating static pages using 5 workers (4/4) in 189ms\n  Finalizing page optimization ...\n\nRoute (app)\n┌ ○ /\n└ ○ /_not-found\n\n\n○  (Static)  prerendered as static content"
+  },
+  "webpack": {
+    "command": "next build --webpack",
+    "builder": "explicit webpack",
+    "startedAt": "2026-08-27T12:20:12.534Z",
+    "finishedAt": "2026-08-27T12:20:21.691Z",
+    "exitStatus": 0,
+    "signal": null,
+    "timedOut": false,
+    "lastAnnouncedStage": "Collecting build traces ...",
+    "lastCompletedBuildStage": "static-generation",
+    "hasReleaseOutput": true,
+    "hasActionableExternalPrerequisiteDiagnostic": false,
+    "actionableDiagnostic": [],
+    "artifactsBefore": {
+      "BUILD_ID": {
+        "exists": true,
+        "size": 21,
+        "modifiedAt": "2026-08-27T12:20:12.286Z"
+      },
+      "prerender-manifest.json": {
+        "exists": true,
+        "size": 3062,
+        "modifiedAt": "2026-08-27T12:20:12.493Z"
+      },
+      "routes-manifest.json": {
+        "exists": true,
+        "size": 1723,
+        "modifiedAt": "2026-08-27T12:20:12.488Z"
+      },
+      "build-manifest.json": {
+        "exists": true,
+        "size": 503,
+        "modifiedAt": "2026-08-27T12:20:10.182Z"
+      },
+      "diagnostics/build-diagnostics.json": {
+        "exists": true,
+        "size": 93,
+        "modifiedAt": "2026-08-27T12:20:12.287Z"
+      },
+      "diagnostics/route-bundle-stats.json": {
+        "exists": true,
+        "size": 932,
+        "modifiedAt": "2026-08-27T12:20:12.497Z"
+      },
+      "server/app/page.js": {
+        "exists": true,
+        "size": 927,
+        "modifiedAt": "2026-08-27T12:20:10.164Z"
+      }
+    },
+    "artifactsAfter": {
+      "BUILD_ID": {
+        "exists": true,
+        "size": 21,
+        "modifiedAt": "2026-08-27T12:20:18.127Z"
+      },
+      "prerender-manifest.json": {
+        "exists": true,
+        "size": 3062,
+        "modifiedAt": "2026-08-27T12:20:19.163Z"
+      },
+      "routes-manifest.json": {
+        "exists": true,
+        "size": 1723,
+        "modifiedAt": "2026-08-27T12:20:19.137Z"
+      },
+      "build-manifest.json": {
+        "exists": true,
+        "size": 510,
+        "modifiedAt": "2026-08-27T12:20:16.159Z"
+      },
+      "diagnostics/build-diagnostics.json": {
+        "exists": true,
+        "size": 93,
+        "modifiedAt": "2026-08-27T12:20:18.147Z"
+      },
+      "diagnostics/route-bundle-stats.json": {
+        "exists": false
+      },
+      "server/app/page.js": {
+        "exists": true,
+        "size": 66434,
+        "modifiedAt": "2026-08-27T12:20:14.277Z"
+      }
+    },
+    "artifactsGeneratedOrChanged": [
+      "BUILD_ID",
+      "prerender-manifest.json",
+      "routes-manifest.json",
+      "build-manifest.json",
+      "diagnostics/build-diagnostics.json",
+      "server/app/page.js"
+    ],
+    "output": "▲ Next.js 16.2.12 (webpack)\n\n  Creating an optimized production build ...\n✓ Compiled successfully in 1263ms\n  Running TypeScript ...\n  Finished TypeScript in 1484ms ...\n  Collecting page data using 5 workers ...\n  Generating static pages using 5 workers (0/4) ...\n  Generating static pages using 5 workers (1/4) \r\n  Generating static pages using 5 workers (2/4) \r\n  Generating static pages using 5 workers (3/4) \r\n✓ Generating static pages using 5 workers (4/4) in 369ms\n  Finalizing page optimization ...\n  Collecting build traces ...\n\nRoute (app)\n┌ ○ /\n└ ○ /_not-found\n\n\n○  (Static)  prerendered as static content"
+  },
+  "routeBundleStats": null,
+  "auditedFirstLoadUncompressedJsBytes": 685160,
+  "baselineDisposition": "Current build attempts did not emit route-bundle-stats.json; retain the audited 685160-byte baseline and do not substitute a different value."
+}
