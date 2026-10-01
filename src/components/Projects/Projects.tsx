@@ -110,7 +110,7 @@ export default function Projects() {
           data-project-mode="pinned"
           className="relative"
           style={{
-            height: "400vh",
+            height: "300vh",
           }}
         >
           <div className="sticky top-0 h-screen overflow-hidden">

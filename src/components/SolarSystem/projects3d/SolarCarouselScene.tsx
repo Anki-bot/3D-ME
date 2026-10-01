@@ -3,38 +3,57 @@
 import {
   MutableRefObject,
   Suspense,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Line } from "@react-three/drei";
 import * as THREE from "three";
 import { projects } from "@/data/projects";
-import SunAnchor from "./SunAnchor";
+import SunNode from "./SunAnchor";
 import ProjectOrbitCard from "./ProjectOrbitCard";
-import { orbitForIndex } from "./orbitTable";
+import { SHARED_ORBIT } from "./orbitTable";
 
 const RING_SEGMENTS = 128;
-const FIXED_CAMERA_POSITION: [number, number, number] = [0, 2.5, 10];
+const FIXED_CAMERA_POSITION: [number, number, number] = [0, 2, 8];
+const MAX_CONTEXT_RETRIES = 2;
+// Troika (drei <Text>) fetches its default font from a CDN at runtime.
+const TROIKA_CDN_ORIGIN = "https://fonts.gstatic.com";
 
-function OrbitRing({ index }: { index: number }) {
-  const orbit = orbitForIndex(index);
+// NOTE: troika loads its bundled default font; preconnect to the font
+// origin so first paint of labels is fast. No-op when offline.
+function useFontPreconnect() {
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const link = document.createElement("link");
+    link.rel = "preconnect";
+    link.href = TROIKA_CDN_ORIGIN;
+    document.head.appendChild(link);
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
+}
+
+function OrbitRing() {
   const points = useMemo<[number, number, number][]>(
     () =>
       Array.from({ length: RING_SEGMENTS + 1 }, (_, s) => {
         const a = (s / RING_SEGMENTS) * Math.PI * 2;
         return [
-          Math.cos(a) * orbit.rx,
-          orbit.y,
-          Math.sin(a) * orbit.rz,
+          Math.cos(a) * SHARED_ORBIT.radius,
+          0,
+          Math.sin(a) * SHARED_ORBIT.radius,
         ] as [number, number, number];
       }),
-    [orbit.rx, orbit.rz, orbit.y]
+    []
   );
 
   return (
-    <group rotation={[orbit.tiltX, 0, orbit.tiltZ]}>
+    <group rotation={SHARED_ORBIT.tilt}>
       <Line points={points} lineWidth={1} transparent opacity={0.25} />
     </group>
   );
@@ -93,8 +112,29 @@ export default function SolarCarouselScene({
   const wrapRef = useRef<HTMLDivElement>(null);
   const visibleRef = useRef(true);
   const displayRef = useRef(0);
+  const [remountKey, setRemountKey] = useState(0);
+  const retriesRef = useRef(0);
   const errorRef = useRef(onError);
   errorRef.current = onError;
+
+  useFontPreconnect();
+
+  const handleContextLost = useCallback((event: Event) => {
+    event.preventDefault();
+    if (retriesRef.current >= MAX_CONTEXT_RETRIES) {
+      errorRef.current?.();
+    }
+    // Otherwise wait for `webglcontextrestored`, which remounts below.
+  }, []);
+
+  const handleContextRestored = useCallback(() => {
+    if (retriesRef.current < MAX_CONTEXT_RETRIES) {
+      retriesRef.current += 1;
+      setRemountKey((k) => k + 1);
+    } else {
+      errorRef.current?.();
+    }
+  }, []);
 
   useEffect(() => {
     const element = wrapRef.current;
@@ -123,26 +163,19 @@ export default function SolarCarouselScene({
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    const canvas = element.querySelector("canvas");
-    const handleContextLost = (event: Event) => {
-      event.preventDefault();
-      errorRef.current?.();
-    };
-    canvas?.addEventListener("webglcontextlost", handleContextLost);
-
     return () => {
       observer.disconnect();
       document.removeEventListener(
         "visibilitychange",
         handleVisibilityChange
       );
-      canvas?.removeEventListener("webglcontextlost", handleContextLost);
     };
   }, []);
 
   return (
     <div ref={wrapRef} className="orbit-carousel-wrap absolute inset-0">
       <Canvas
+        key={remountKey}
         dpr={[1, 1.5]}
         camera={{
           fov: 45,
@@ -153,44 +186,56 @@ export default function SolarCarouselScene({
         gl={{ antialias: false, powerPreference: "high-performance" }}
         onCreated={({ gl, camera }) => {
           gl.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-          // Fixed camera: aimed once at the sun, never animated per-frame.
+          // Fixed camera: aimed once, never animated per-frame.
           camera.lookAt(0, 0, 0);
+          // The canvas is guaranteed to exist here — unlike querying the
+          // DOM at effect time — so context events are never missed.
+          gl.domElement.addEventListener(
+            "webglcontextlost",
+            handleContextLost
+          );
+          gl.domElement.addEventListener(
+            "webglcontextrestored",
+            handleContextRestored
+          );
         }}
         style={{ background: "transparent" }}
       >
+        <ambientLight intensity={0.6} />
+        <pointLight
+          position={[0, 0, 0]}
+          intensity={3}
+          color="#FFAA33"
+          distance={30}
+        />
+        <directionalLight position={[5, 5, 5]} intensity={0.8} />
+        {/* Sun + rings never suspend: a stalled font fetch can't blank them. */}
         <Suspense fallback={null}>
-          <ambientLight intensity={0.6} />
-          <pointLight
-            position={[0, 0, 0]}
-            intensity={3}
-            color="#FFAA33"
-            distance={30}
-          />
-          <directionalLight position={[5, 5, 5]} intensity={0.8} />
-          <SunAnchor position={[0, 0, 0]} />
-          {projects.map((_, i) => (
-            <OrbitRing key={`orbit-${i}`} index={i} />
-          ))}
-          {projects.map((project, i) => (
+          <SunNode position={[0, 0, 0]} />
+          <OrbitRing />
+        </Suspense>
+        {/* Each card suspends independently (textures + troika font), so one
+            slow asset can never blank the whole scene. */}
+        {projects.map((project, i) => (
+          <Suspense key={project.id} fallback={null}>
             <ProjectOrbitCard
-              key={project.id}
               project={project}
               index={i}
               total={projects.length}
               progressRef={displayRef}
               hoveredRef={hoveredRef}
-              orbit={orbitForIndex(i)}
+              orbit={SHARED_ORBIT}
               visibilityRef={visibleRef}
             />
-          ))}
-          <ProgressQuantizer
-            progressRef={progressRef}
-            displayRef={displayRef}
-            total={projects.length}
-            quantize={quantizeMotion}
-          />
-          <Starfield />
-        </Suspense>
+          </Suspense>
+        ))}
+        <ProgressQuantizer
+          progressRef={progressRef}
+          displayRef={displayRef}
+          total={projects.length}
+          quantize={quantizeMotion}
+        />
+        <Starfield />
       </Canvas>
     </div>
   );

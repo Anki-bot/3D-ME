@@ -9,6 +9,8 @@ import { getProjectMedia } from "@/data/projectMedia";
 import { OrbitParams } from "./orbitTable";
 
 const FULL_REVOLUTION = Math.PI * 2;
+// Fixed camera per spec — cards lookAt this literal.
+const FIXED_LOOK_AT: [number, number, number] = [0, 2, 8];
 
 interface ProjectOrbitCardProps {
   project: Project;
@@ -38,14 +40,14 @@ export default function ProjectOrbitCard({
   const groupRef = useRef<THREE.Group>(null);
   const overlayRef = useRef<THREE.Mesh>(null);
   const angleRef = useRef(0);
+  const scaleRef = useRef(1);
   const texture = useTexture(project.image);
-  const tiltEuler = useRef(
-    new THREE.Euler(orbit.tiltX, 0, orbit.tiltZ)
-  );
+  const tiltEuler = useRef(new THREE.Euler(...orbit.tilt));
+  const lookAtVec = useRef(new THREE.Vector3(...FIXED_LOOK_AT));
   const tmpVec = useRef(new THREE.Vector3());
 
   // Hover VideoTexture: mount only after successful `canplay` so missing
-  // placeholder mp4s stay silent image cards.
+  // hover clips stay silent image cards.
   useEffect(() => {
     if (!hovered) return;
     if (typeof window === "undefined" || typeof document === "undefined")
@@ -117,8 +119,9 @@ export default function ProjectOrbitCard({
     };
   }, [hovered]);
 
-  // Scroll-driven orbital math + billboard + hover-video fade.
-  useFrame(({ camera }, delta) => {
+  // Scroll-driven orbital math: cards ride the shared ring, always face
+  // the fixed camera, scale up slightly on hover.
+  useFrame((_, delta) => {
     const group = groupRef.current;
     if (!group) return;
     if (visibilityRef?.current === false) return;
@@ -129,8 +132,10 @@ export default function ProjectOrbitCard({
       return;
 
     const t = THREE.MathUtils.clamp(progressRef.current ?? 0, 0, 1);
+    // Distribute cards evenly; scroll progress drives rotation forward.
     const baseAngle = (index / total) * FULL_REVOLUTION;
-    const angle = baseAngle + t * FULL_REVOLUTION;
+    const scrollAngle = t * FULL_REVOLUTION;
+    const angle = baseAngle + scrollAngle;
     // Pause this card's orbital math while hovered; scroll progress itself
     // keeps flowing so overlay/dots stay live.
     if (hoveredRef.current !== index) {
@@ -138,17 +143,19 @@ export default function ProjectOrbitCard({
     }
     const a = angleRef.current;
     tmpVec.current
-      .set(
-        Math.cos(a) * orbit.rx,
-        orbit.y,
-        Math.sin(a) * orbit.rz
-      )
+      .set(Math.cos(a) * orbit.radius, 0, Math.sin(a) * orbit.radius)
       .applyEuler(tiltEuler.current);
     group.position.copy(tmpVec.current);
-    // Always face the camera.
-    group.lookAt(camera.position);
-    // Foreground cards scale up as they swing to the front.
-    group.scale.setScalar(1 + 0.25 * Math.cos(a));
+    // Cards always face the fixed camera at [0, 2, 8].
+    group.lookAt(lookAtVec.current);
+    // Hover scale (damped toward 1.1, else back to 1.0).
+    scaleRef.current = THREE.MathUtils.damp(
+      scaleRef.current,
+      hovered ? 1.1 : 1.0,
+      8,
+      delta
+    );
+    group.scale.setScalar(scaleRef.current);
 
     if (overlayRef.current) {
       const material = overlayRef.current.material as THREE.MeshBasicMaterial;
@@ -189,7 +196,7 @@ export default function ProjectOrbitCard({
           );
         }}
       >
-        <planeGeometry args={[3.4, 2.2]} />
+        <planeGeometry args={[3, 2]} />
         <meshPhysicalMaterial
           transparent
           opacity={0.82}
@@ -199,14 +206,14 @@ export default function ProjectOrbitCard({
       </mesh>
 
       {/* Project image */}
-      <mesh position={[0, 0.2, 0.07]}>
-        <planeGeometry args={[2.9, 1.5]} />
+      <mesh position={[0, 0.12, 0.07]}>
+        <planeGeometry args={[2.7, 1.35]} />
         <meshBasicMaterial map={texture} toneMapped={false} />
       </mesh>
 
       {/* Hover video overlay (image-only until `canplay`) */}
-      <mesh ref={overlayRef} position={[0, 0.2, 0.08]}>
-        <planeGeometry args={[2.9, 1.5]} />
+      <mesh ref={overlayRef} position={[0, 0.12, 0.08]}>
+        <planeGeometry args={[2.7, 1.35]} />
         {videoTexture ? (
           <meshBasicMaterial
             map={videoTexture}
@@ -219,9 +226,9 @@ export default function ProjectOrbitCard({
         )}
       </mesh>
 
-      {/* Title / category / year mapped onto the plane */}
+      {/* Title / category / year floating in front of the plane */}
       <Text
-        position={[0, -0.72, 0.09]}
+        position={[0, -0.72, 0.1]}
         fontSize={0.16}
         anchorX="center"
         anchorY="middle"
@@ -230,7 +237,7 @@ export default function ProjectOrbitCard({
         {project.title.toUpperCase()}
       </Text>
       <Text
-        position={[0, -0.95, 0.09]}
+        position={[0, -0.92, 0.1]}
         fontSize={0.09}
         anchorX="center"
         anchorY="middle"
