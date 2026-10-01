@@ -9,61 +9,85 @@ export default function GlassOrb() {
 
   useGSAP(
     () => {
-      if (!orbRef.current) return;
+      if (!orbRef.current || !containerRef.current) return;
 
       const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
       ).matches;
       if (prefersReducedMotion) return;
 
-      const floating = gsap.to(orbRef.current, {
-        y: -18,
-        duration: 4,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-
-      const rotation = gsap.to(orbRef.current, {
-        rotate: 360,
-        duration: 30,
-        repeat: -1,
-        ease: "none",
-        transformOrigin: "50% 50%",
-      });
-
-      const breathing = gsap.to(orbRef.current, {
-        scale: 1.03,
-        duration: 3,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-
-      // Visibility and document visibility eligibility - kill when hidden/offscreen
+      let tweens: gsap.core.Tween[] = [];
       let observer: IntersectionObserver | null = null;
+      let isVisible = true;
+      let isDocumentVisible = document.visibilityState === "visible";
 
-      const killAll = () => {
-        floating.kill();
-        rotation.kill();
-        breathing.kill();
+      const createAnimations = () => {
+        if (!orbRef.current || tweens.length > 0) return;
+        if (!isVisible || !isDocumentVisible) return;
+        // Skip when hidden via CSS (e.g. `hidden lg:flex` parent on mobile)
+        if (orbRef.current.offsetParent === null) return;
+        tweens = [
+          gsap.to(orbRef.current, {
+            y: -18,
+            duration: 4,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          }),
+          gsap.to(orbRef.current, {
+            rotate: 360,
+            duration: 30,
+            repeat: -1,
+            ease: "none",
+            transformOrigin: "50% 50%",
+          }),
+          gsap.to(orbRef.current, {
+            scale: 1.03,
+            duration: 3,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          }),
+        ];
       };
 
-      if (containerRef.current) {
-        observer = new IntersectionObserver(
-          ([entry]) => {
-            if (!entry.isIntersecting) {
-              killAll();
-            }
-          },
-          { threshold: 0 }
-        );
-        observer.observe(containerRef.current);
-      }
+      const killAll = () => {
+        tweens.forEach((t) => t.kill());
+        tweens = [];
+      };
+
+      const pauseAll = () => {
+        tweens.forEach((t) => t.pause());
+      };
+
+      const resumeAll = () => {
+        if (tweens.length === 0) {
+          createAnimations();
+        } else {
+          tweens.forEach((t) => t.resume());
+        }
+      };
+
+      // Visibility lifecycle: pause offscreen / hidden, resume when visible
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          isVisible = entry.isIntersecting;
+          if (isVisible && isDocumentVisible) {
+            resumeAll();
+          } else {
+            pauseAll();
+          }
+        },
+        { threshold: 0 }
+      );
+      observer.observe(containerRef.current);
 
       const handleVisibilityChange = () => {
-        if (document.visibilityState !== "visible") {
-          killAll();
+        isDocumentVisible = document.visibilityState === "visible";
+        if (isDocumentVisible && isVisible) {
+          resumeAll();
+        } else {
+          pauseAll();
         }
       };
 
@@ -72,6 +96,8 @@ export default function GlassOrb() {
       const handleReducedMotionChange = (event: MediaQueryListEvent) => {
         if (event.matches) {
           killAll();
+        } else if (isVisible && isDocumentVisible) {
+          createAnimations();
         }
       };
 
@@ -80,12 +106,23 @@ export default function GlassOrb() {
       );
       reducedMotionQuery.addEventListener("change", handleReducedMotionChange);
 
+      // Handle CSS-hidden parents on resize (e.g. hidden on mobile)
+      const handleResize = () => {
+        if (orbRef.current?.offsetParent === null) {
+          pauseAll();
+        } else if (isVisible && isDocumentVisible) {
+          resumeAll();
+        }
+      };
+      window.addEventListener("resize", handleResize);
+
+      createAnimations();
+
       return () => {
-        floating.kill();
-        rotation.kill();
-        breathing.kill();
+        killAll();
         observer?.disconnect();
         document.removeEventListener("visibilitychange", handleVisibilityChange);
+        window.removeEventListener("resize", handleResize);
         reducedMotionQuery.removeEventListener(
           "change",
           handleReducedMotionChange

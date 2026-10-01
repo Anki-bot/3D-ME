@@ -21,11 +21,15 @@ export default function SolarSystem() {
         </div>
       </div>
 
-      {/* Solar System - sun video at centre (same quality you shared), stays centre on swipe, projects orbit */}
+      {/* Solar System - sun video at centre (same quality you shared), stays centre on swipe, projects orbit.
+          Scroll height math: 100vh sticky viewport + ~80vh of scrub scroll per
+          project (8 projects => 740vh total). Progress 0..1 maps evenly via
+          floor(progress * N), and planet stagger completes near progress 0.9,
+          so the last project lands exactly at the sticky end with no dead tail. */}
       <div
         ref={containerRef}
         className="relative"
-        style={{ height: `${projects.length * 100}vh` }}
+        style={{ height: `${100 + projects.length * 80}vh` }}
       >
         <div className="sticky top-0 h-screen overflow-hidden bg-black">
           {/* Sun video centre - same 153M quality */}

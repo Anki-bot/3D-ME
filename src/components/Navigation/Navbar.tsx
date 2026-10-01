@@ -8,10 +8,12 @@ export default function Navbar() {
         className="
           flex
           w-full
+          min-w-0
           max-w-[calc(100vw-1.5rem)]
           items-center
           justify-between
-          gap-3
+          gap-2
+          overflow-hidden
           rounded-full
           border
           border-white/10
@@ -21,6 +23,7 @@ export default function Navbar() {
           shadow-[0_8px_40px_rgba(0,0,0,0.35)]
           backdrop-blur-2xl
           supports-[backdrop-filter]:bg-white/5
+          min-[320px]:gap-3
           sm:w-auto
           sm:max-w-none
           sm:gap-12

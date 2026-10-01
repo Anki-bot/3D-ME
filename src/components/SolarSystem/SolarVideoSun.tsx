@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { projects } from "@/data/projects";
+import { useTheme } from "@/components/Theme/ThemeProvider";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,6 +19,8 @@ export default function SolarVideoSun({
   const sunRef = useRef<HTMLVideoElement>(null);
   const sunContainerRef = useRef<HTMLDivElement>(null);
   const orbitsRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
+  const isLight = theme === "light";
 
   useEffect(() => {
     if (!containerRef.current || !orbitsRef.current) return;
@@ -37,10 +40,14 @@ export default function SolarVideoSun({
         start: "top top",
         end: "bottom bottom",
         scrub: 1,
+        invalidateOnRefresh: true,
         onUpdate: (self) => {
           const progress = self.progress;
-          // Update project index
-          const idx = Math.min(Math.floor(progress * projects.length + 0.25), projects.length - 1);
+          // Update project index — evenly distribute N projects across 0..1
+          const idx = Math.min(
+            Math.floor(progress * projects.length),
+            projects.length - 1
+          );
           onProjectChange(idx);
 
           // Sun same size, moves down with swipe but stays stuck to top and follows till end (vertical solar system)
@@ -61,7 +68,10 @@ export default function SolarVideoSun({
             orbitsEl.style.transformOrigin = "center center";
           }
 
-          // Planets: sun only 0-0.08, then 8 planets fade in orbiting
+          // Planets: sun only 0-0.06, then 8 planets fade in orbiting.
+          // Stagger is distributed so the last planet finishes near progress ~0.9,
+          // avoiding a long dead-scroll tail where nothing changes.
+          const stagger = projects.length > 1 ? 0.64 / (projects.length - 1) : 0;
           planets.forEach((el, i) => {
             const radius = 135 + i * 34;
             const speed = 0.55 - i * 0.045;
@@ -70,7 +80,7 @@ export default function SolarVideoSun({
             const x = Math.cos(angle) * radius;
             const y = Math.sin(angle) * radius * 0.38;
             const planet = el as HTMLElement;
-            const appearProgress = Math.max(0, Math.min(1, (progress - 0.06 - i * 0.04) / 0.2));
+            const appearProgress = Math.max(0, Math.min(1, (progress - 0.06 - i * stagger) / 0.2));
             const scale = (0.85 + Math.sin(angle) * 0.1 + 0.1) * (0.5 + appearProgress * 0.5);
             planet.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
             planet.style.zIndex = `${Math.round(10 + Math.sin(angle) * 5)}`;
@@ -82,14 +92,19 @@ export default function SolarVideoSun({
       return () => trigger.kill();
     });
 
+    ScrollTrigger.refresh();
+
     return () => ctx.revert();
   }, [containerRef, onProjectChange]);
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      {/* Starfield */}
-      <div className="absolute inset-0 bg-black" />
-      <div className="absolute inset-0 opacity-60" style={{ background: "radial-gradient(ellipse at center top, transparent 20%, rgba(0,0,0,0.85) 75%)" }} />
+    <div className="solar-system-viewport absolute inset-0 overflow-hidden">
+      {/* Starfield — suppressed in light theme via CSS (.solar-starfield) */}
+      <div className="solar-starfield absolute inset-0 bg-black" />
+      <div
+        className="solar-starfield-glow absolute inset-0 opacity-60"
+        style={{ background: "radial-gradient(ellipse at center top, transparent 20%, rgba(0,0,0,0.85) 75%)" }}
+      />
 
       {/* Sun - same size, stuck to top of page, follows till end (vertical solar system) */}
       <div
@@ -105,8 +120,13 @@ export default function SolarVideoSun({
           muted
           playsInline
           preload="auto"
-          className="h-full w-full object-cover"
-          style={{ filter: "brightness(1.1) contrast(1.05)" }}
+          className="solar-sun-video h-full w-full object-cover"
+          style={{
+            filter: isLight
+              ? "brightness(1.05) contrast(0.95) saturate(1.1)"
+              : "brightness(1.1) contrast(1.05)",
+            mixBlendMode: isLight ? "screen" : "normal",
+          }}
         />
         <div className="pointer-events-none absolute inset-0 rounded-full shadow-[inset_0_0_60px_rgba(255,200,80,0.4)]" />
       </div>

@@ -35,6 +35,8 @@ export default function GlowOrb({
       const createAnimation = () => {
         if (!orbRef.current || animation) return;
         if (!isVisible || !isDocumentVisible) return;
+        // Respect CSS-hidden ancestors (e.g. display:none on smaller screens)
+        if (orbRef.current.offsetParent === null) return;
         animation = gsap.to(orbRef.current, {
           x,
           y,
@@ -89,6 +91,16 @@ export default function GlowOrb({
       );
       reducedMotionQuery.addEventListener("change", handleReducedMotionChange);
 
+      // Re-evaluate CSS visibility on resize (hidden parents on mobile)
+      const handleResize = () => {
+        if (orbRef.current?.offsetParent === null) {
+          killAnimation();
+        } else if (isVisible && isDocumentVisible) {
+          createAnimation();
+        }
+      };
+      window.addEventListener("resize", handleResize);
+
       if (isVisible && isDocumentVisible) {
         createAnimation();
       }
@@ -96,6 +108,7 @@ export default function GlowOrb({
       return () => {
         killAnimation();
         observer?.disconnect();
+        window.removeEventListener("resize", handleResize);
         document.removeEventListener(
           "visibilitychange",
           handleVisibilityChange
