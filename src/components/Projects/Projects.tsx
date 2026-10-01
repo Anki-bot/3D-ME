@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { useSectionReveal } from "@/hooks/animations/useSectionReveal";
 import { projects } from "@/data/projects";
@@ -12,15 +13,28 @@ import ProjectShowcase from "./ProjectShowcase";
 import ProjectProgress from "./ProjectProgress";
 import { useProjectMode } from "./useProjectMode";
 import { useProjectsScroll } from "@/hooks/scroll/useProjectsScroll";
+import { useSolarScroll } from "@/components/SolarSystem/projects3d/useSolarScroll";
+import { useReducedMotion } from "@/hooks/capability/useReducedMotion";
+
+const SolarCarouselScene = dynamic(
+  () => import("@/components/SolarSystem/projects3d/SolarCarouselScene"),
+  { ssr: false, loading: () => null }
+);
 
 export default function Projects() {
   const [activeProject, setActiveProject] = useState(0);
+  const [webGLFailed, setWebGLFailed] = useState(false);
   const projectMode = useProjectMode();
   const isPinnedMode = projectMode === "pinned";
+  const prefersReducedMotion = useReducedMotion();
 
   const sectionRef = useRef<HTMLElement>(null);
   const showcaseRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef(0);
+  const hoveredRef = useRef<number | null>(null);
+
+  const showCarousel = isPinnedMode && !webGLFailed;
 
   const eyebrowRef = useRef<HTMLParagraphElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -32,9 +46,18 @@ export default function Projects() {
 
   useProjectsScroll({
     container: showcaseRef,
-    enabled: isPinnedMode,
+    enabled: showCarousel,
     projectCount: projects.length,
     onProjectChange: setActiveProject,
+  });
+
+  useSolarScroll({
+    container: showcaseRef,
+    enabled: showCarousel,
+    projectCount: projects.length,
+    onProjectChange: setActiveProject,
+    progressRef,
+    hoveredRef,
   });
 
   useEffect(() => {
@@ -79,19 +102,29 @@ export default function Projects() {
         </div>
       </div>
 
-      {isPinnedMode ? (
-        /* Pinned desktop mode: preserve the audited one-active-project sequence. */
+      {showCarousel ? (
+        /* Pinned desktop mode: fixed-camera 3D orbital carousel. */
         <div
           key="pinned"
           ref={showcaseRef}
           data-project-mode="pinned"
           className="relative"
           style={{
-            height: `${projects.length * 100}vh`,
+            height: "400vh",
           }}
         >
           <div className="sticky top-0 h-screen overflow-hidden">
-            <div className="mx-auto flex h-full w-full max-w-[1200px] items-center px-8">
+            {/* Fixed-camera WebGL carousel: sun + orbit rings + cards */}
+            <SolarCarouselScene
+              progressRef={progressRef}
+              hoveredRef={hoveredRef}
+              quantizeMotion={prefersReducedMotion}
+              onError={() => setWebGLFailed(true)}
+            />
+
+            {/* Overlay copy stays DOM-readable; pointer-events-none so the
+                canvas keeps hover/click raycasts. */}
+            <div className="pointer-events-none absolute inset-0 mx-auto flex h-full w-full max-w-[1200px] items-end px-8 pb-10">
               <ProjectShowcase project={projects[activeProject]} />
             </div>
 

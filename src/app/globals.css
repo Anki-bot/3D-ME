@@ -157,6 +157,24 @@ html[data-custom-cursor="active"] a {
   cursor: none;
 }
 
+/* Solar WebGL fly-through container */
+.solar-webgl-wrap {
+  background: #000;
+}
+
+html[data-theme="light"] .solar-webgl-wrap {
+  background: #fafaf9;
+}
+
+/* Fixed-camera orbital carousel container */
+.orbit-carousel-wrap {
+  background: #000;
+}
+
+html[data-theme="light"] .orbit-carousel-wrap {
+  background: #fafaf9;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
