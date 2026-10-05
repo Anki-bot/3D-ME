@@ -8,7 +8,7 @@ import { ScrollTrigger } from "@/lib/gsap";
 import { projects, type Project } from "@/data/projects";
 import ProjectCard from "@/components/Projects/ProjectCard";
 
-// 1. The Central Sun (Using safe DOM video loading & event listeners)
+// 1. The Fixed Sun (Using meshBasicMaterial so it is never dark on any side)
 function Sun() {
   const meshRef = useRef<THREE.Mesh>(null);
   const [videoTexture, setVideoTexture] = useState<THREE.VideoTexture | null>(
@@ -23,7 +23,6 @@ function Sun() {
     video.playsInline = true;
     video.crossOrigin = "Anonymous";
 
-    // Fix: Wait for video to be ready before setting state to appease the linter
     const handleCanPlay = () => {
       const texture = new THREE.VideoTexture(video);
       texture.colorSpace = THREE.SRGBColorSpace;
@@ -31,7 +30,7 @@ function Sun() {
     };
 
     video.addEventListener("canplay", handleCanPlay);
-    video.play().catch(() => console.log("Autoplay prevented by browser"));
+    video.play().catch(() => console.log("Autoplay prevented"));
 
     return () => {
       video.removeEventListener("canplay", handleCanPlay);
@@ -51,50 +50,29 @@ function Sun() {
     <mesh ref={meshRef}>
       <sphereGeometry args={[1.5, 64, 64]} />
       {videoTexture ? (
-        <meshBasicMaterial map={videoTexture} />
+        <meshBasicMaterial map={videoTexture} toneMapped={false} />
       ) : (
-        <meshStandardMaterial
-          emissive="#FFAA33"
-          emissiveIntensity={2.5}
-          color="#FFCC66"
-        />
+        <meshBasicMaterial color="#FFCC66" />
       )}
     </mesh>
   );
 }
 
-// 2. The Orbiting Project Cards
-// Fix: Use strict Project type instead of 'any'
-function Planet({
-  project,
-  index,
-  total,
-  scrollRef,
-}: {
-  project: Project;
-  index: number;
-  total: number;
-  scrollRef: React.MutableRefObject<number>;
-}) {
+// 2. Individual Project Card (Fixed to a specific spot on the spiral track)
+function Planet({ project, index }: { project: Project; index: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  // Fix: Explicitly cast to THREE.Texture
   const texture = useTexture(project.image) as THREE.Texture;
   const [hovered, setHovered] = useState(false);
+
+  // Math for placing the card on the DNA Helix
+  const angle = index * (Math.PI / 1.5); // Spaced evenly around the circle
+  const radius = 6.5; // Distance from the sun
+  const yPos = index * 4.5; // Staggered vertically by 4.5 units
 
   useFrame(({ camera }) => {
     if (!meshRef.current) return;
 
-    // Orbital Math: Base position + Scroll offset
-    const baseAngle = (index / total) * Math.PI * 2;
-    const scrollAngle = scrollRef.current * Math.PI * 2;
-    const finalAngle = baseAngle + scrollAngle;
-    const radius = 6.5;
-
-    // Move along the X and Z axis around the sun
-    meshRef.current.position.x = Math.cos(finalAngle) * radius;
-    meshRef.current.position.z = Math.sin(finalAngle) * radius;
-
-    // Cards always face the fixed camera
+    // Cards must always pivot to face the user's camera
     meshRef.current.lookAt(camera.position);
 
     // Smooth hover scale
@@ -108,6 +86,7 @@ function Planet({
   return (
     <mesh
       ref={meshRef}
+      position={[Math.cos(angle) * radius, yPos, Math.sin(angle) * radius]}
       onPointerOver={(e) => {
         e.stopPropagation();
         setHovered(true);
@@ -119,20 +98,19 @@ function Planet({
         document.body.style.cursor = "auto";
       }}
       onClick={() => {
-        // Fallback for custom URL property without using 'any'
         const customProject = project as Project & { url?: string };
         if (customProject.url) window.open(customProject.url, "_blank");
       }}
     >
-      <planeGeometry args={[3, 2]} />
+      <planeGeometry args={[3.5, 2.2]} />
       <meshBasicMaterial
         map={texture}
         transparent
         opacity={hovered ? 1 : 0.85}
       />
       <Text
-        position={[0, -1.3, 0.1]}
-        fontSize={0.2}
+        position={[0, -1.4, 0.1]}
+        fontSize={0.25}
         color="white"
         anchorX="center"
         anchorY="middle"
@@ -143,44 +121,52 @@ function Planet({
   );
 }
 
-// 3. Scene Composition
-function OrbitalScene({
+// 3. The Chaining Helix System (Moves as a single unit when scrolled)
+function HelixSystem({
   scrollRef,
 }: {
   scrollRef: React.MutableRefObject<number>;
 }) {
-  // Generate points for the visible orbital ring
-  const ringPoints = [];
-  for (let i = 0; i <= 64; i++) {
-    const angle = (i / 64) * Math.PI * 2;
-    ringPoints.push(
-      new THREE.Vector3(Math.cos(angle) * 6.5, 0, Math.sin(angle) * 6.5),
+  const groupRef = useRef<THREE.Group>(null);
+
+  // Create a smooth spiral line to act as the track
+  const helixPoints = [];
+  const totalHeight = projects.length * 4.5;
+  for (let i = 0; i <= 200; i++) {
+    const t = i / 200;
+    const angle = t * projects.length * (Math.PI / 1.5);
+    const y = t * totalHeight;
+    helixPoints.push(
+      new THREE.Vector3(Math.cos(angle) * 6.5, y, Math.sin(angle) * 6.5),
     );
   }
 
-  return (
-    // Tilt the entire solar system slightly for a cinematic 3D perspective
-    <group rotation={[Math.PI / 10, 0, 0]}>
-      <ambientLight intensity={1} />
-      <Sun />
-      <Line points={ringPoints} color="rgba(255,255,255,0.15)" lineWidth={1} />
+  useFrame(() => {
+    if (!groupRef.current) return;
+    const progress = scrollRef.current;
 
-      <Suspense fallback={null}>
-        {projects.map((project, i) => (
-          <Planet
-            key={project.id}
-            project={project}
-            index={i}
-            total={projects.length}
-            scrollRef={scrollRef}
-          />
-        ))}
-      </Suspense>
+    // 1. Spin the entire helix as we scroll
+    groupRef.current.rotation.y = progress * Math.PI * 4;
+
+    // 2. Slide the entire helix downward
+    // Starts high (Y=8) so card 0 is out of view.
+    // Ends low so the last card passes the camera.
+    const startY = 8;
+    const endY = -totalHeight - 8;
+    groupRef.current.position.y = THREE.MathUtils.lerp(startY, endY, progress);
+  });
+
+  return (
+    <group ref={groupRef}>
+      <Line points={helixPoints} color="rgba(255,255,255,0.2)" lineWidth={1} />
+      {projects.map((project, i) => (
+        <Planet key={project.id} project={project} index={i} />
+      ))}
     </group>
   );
 }
 
-// 4. Main Container & ScrollTrigger
+// 4. Main Scene & Scroll Constraints
 export default function SolarSystem() {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollProgressRef = useRef(0);
@@ -188,11 +174,13 @@ export default function SolarSystem() {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Track scroll progress through the 300vh container
+    // Generous scroll height so users can comfortably scroll through all projects
+    const scrollHeight = projects.length * 150;
+
     const trigger = ScrollTrigger.create({
       trigger: containerRef.current,
       start: "top top",
-      end: "bottom bottom",
+      end: `+=${scrollHeight}%`,
       scrub: 1,
       onUpdate: (self) => {
         scrollProgressRef.current = self.progress;
@@ -204,21 +192,29 @@ export default function SolarSystem() {
 
   return (
     <section id="projects" className="relative bg-black">
-      {/* Desktop 3D WebGL Carousel */}
+      {/* 3D WebGL Carousel with STRICT full-screen boundaries */}
       <div
         ref={containerRef}
         className="hidden lg:block relative"
-        style={{ height: "300vh" }}
+        style={{ height: `${projects.length * 150}vh` }}
       >
-        <div className="sticky top-0 h-screen w-full overflow-hidden bg-black">
-          <Canvas camera={{ position: [0, 2, 10], fov: 45 }}>
-            <OrbitalScene scrollRef={scrollProgressRef} />
+        <div className="sticky top-0 h-screen w-full overflow-hidden bg-black absolute inset-0">
+          <Canvas
+            camera={{ position: [0, 2, 12], fov: 45 }}
+            style={{ width: "100vw", height: "100vh", display: "block" }}
+          >
+            <ambientLight intensity={1} />
+            <group rotation={[Math.PI / 12, 0, 0]}>
+              <Sun />
+              <Suspense fallback={null}>
+                <HelixSystem scrollRef={scrollProgressRef} />
+              </Suspense>
+            </group>
           </Canvas>
         </div>
       </div>
 
-      {/* Mobile 2D Fallback View */}
-      {/* Fix: use max-w-7xl instead of arbitrary brackets */}
+      {/* Mobile 2D Fallback */}
       <div className="mx-auto w-full max-w-7xl px-5 pb-24 pt-24 sm:px-8 sm:pb-32 lg:hidden">
         <div className="flex flex-col gap-24 sm:gap-32">
           <div className="mb-12">

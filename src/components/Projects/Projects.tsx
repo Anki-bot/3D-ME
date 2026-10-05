@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { useSectionReveal } from "@/hooks/animations/useSectionReveal";
 import { projects } from "@/data/projects";
@@ -13,28 +12,22 @@ import ProjectShowcase from "./ProjectShowcase";
 import ProjectProgress from "./ProjectProgress";
 import { useProjectMode } from "./useProjectMode";
 import { useProjectsScroll } from "@/hooks/scroll/useProjectsScroll";
-import { useSolarScroll } from "@/components/SolarSystem/projects3d/useSolarScroll";
-import { useReducedMotion } from "@/hooks/capability/useReducedMotion";
 
-const SolarCarouselScene = dynamic(
-  () => import("@/components/SolarSystem/projects3d/SolarCarouselScene"),
-  { ssr: false, loading: () => null }
-);
+// NOTE: unmounted (page renders SolarSystem). The canonical pinned carousel
+// lives in SolarSystem.tsx; this file is kept for test/source contracts and
+// the SSR-safe flow fallback. The deleted projects3d/ imports were removed
+// so the module resolves without the old carousel files.
 
 export default function Projects() {
   const [activeProject, setActiveProject] = useState(0);
-  const [webGLFailed, setWebGLFailed] = useState(false);
   const projectMode = useProjectMode();
   const isPinnedMode = projectMode === "pinned";
-  const prefersReducedMotion = useReducedMotion();
 
   const sectionRef = useRef<HTMLElement>(null);
   const showcaseRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
-  const progressRef = useRef(0);
-  const hoveredRef = useRef<number | null>(null);
 
-  const showCarousel = isPinnedMode && !webGLFailed;
+  const showCarousel = isPinnedMode;
 
   const eyebrowRef = useRef<HTMLParagraphElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -49,15 +42,6 @@ export default function Projects() {
     enabled: showCarousel,
     projectCount: projects.length,
     onProjectChange: setActiveProject,
-  });
-
-  useSolarScroll({
-    container: showcaseRef,
-    enabled: showCarousel,
-    projectCount: projects.length,
-    onProjectChange: setActiveProject,
-    progressRef,
-    hoveredRef,
   });
 
   useEffect(() => {
@@ -114,13 +98,8 @@ export default function Projects() {
           }}
         >
           <div className="sticky top-0 h-screen overflow-hidden">
-            {/* Fixed-camera WebGL carousel: sun + orbit rings + cards */}
-            <SolarCarouselScene
-              progressRef={progressRef}
-              hoveredRef={hoveredRef}
-              quantizeMotion={prefersReducedMotion}
-              onError={() => setWebGLFailed(true)}
-            />
+            {/* Pinned placeholder: canonical 3D carousel lives in SolarSystem.tsx
+                (unmounted file — no canvas here to avoid duplicate GL contexts). */}
 
             {/* Overlay copy stays DOM-readable; pointer-events-none so the
                 canvas keeps hover/click raycasts. */}
